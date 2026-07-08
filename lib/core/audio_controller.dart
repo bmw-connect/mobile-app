@@ -20,7 +20,7 @@ enum ConnectionStatus {
 }
 
 class AudioController extends ChangeNotifier {
-  // ─── DSP state ───────────────────────────────────────────────────────────────
+  // DSP state
 
   DspState _dsp = DspState.initial();
   StatsSnapshot? _stats;
@@ -30,7 +30,7 @@ class AudioController extends ChangeNotifier {
   StatsSnapshot? get stats => _stats;
   TrackInfo? get track => _track;
 
-  // ─── Connection ───────────────────────────────────────────────────────────────
+  // Connection
 
   ConnectionStatus _status = ConnectionStatus.disconnected;
   ConnectionMode _mode = ConnectionMode.none;
@@ -43,7 +43,7 @@ class AudioController extends ChangeNotifier {
   String? get connectedLabel => _connectedLabel;
   bool get isConnected => _status == ConnectionStatus.connected;
 
-  // ─── WebSocket ───────────────────────────────────────────────────────────────
+  // WebSocket
 
   WebSocketChannel? _ws;
   StreamSubscription? _wsSub;
@@ -52,7 +52,7 @@ class AudioController extends ChangeNotifier {
 
   String? get wsHost => _wsHost;
 
-  // ─── BLE ─────────────────────────────────────────────────────────────────────
+  // BLE
 
   BluetoothDevice? _bleDevice;
   BluetoothCharacteristic? _bleCmdChar;
@@ -67,12 +67,12 @@ class AudioController extends ChangeNotifier {
   List<ScanResult> get scanResults => List.unmodifiable(_scanResults);
   bool get isScanning => _isScanning;
 
-  // ─── Saved preferences ───────────────────────────────────────────────────────
+  // Saved preferences
 
   static const _kWsHost = 'ws_host';
   static const _kMode = 'connection_mode';
 
-  // ─── Init ─────────────────────────────────────────────────────────────────────
+  // Init
 
   Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
@@ -83,7 +83,7 @@ class AudioController extends ChangeNotifier {
     }
   }
 
-  // ─── WebSocket ───────────────────────────────────────────────────────────────
+  // WebSocket
 
   Future<void> connectWebSocket(String host) async {
     await _disconnectAll();
@@ -144,7 +144,7 @@ class AudioController extends ChangeNotifier {
     });
   }
 
-  // ─── BLE ─────────────────────────────────────────────────────────────────────
+  // BLE
 
   Future<void> startBleScan() async {
     await _disconnectAll();
@@ -172,7 +172,7 @@ class AudioController extends ChangeNotifier {
     } catch (e) {
       _isScanning = false;
       _setStatus(ConnectionStatus.error);
-      _errorMsg = 'BLE not available: $e';
+      _errorMsg = 'BLE not available.\nTry enabling Bluetooth or check the application permissions.';
     }
   }
 
@@ -242,7 +242,7 @@ class AudioController extends ChangeNotifier {
     }
   }
 
-  // ─── Disconnect ───────────────────────────────────────────────────────────────
+  // Disconnect
 
   Future<void> _disconnectAll() async {
     _wsReconnectTimer?.cancel();
@@ -283,7 +283,7 @@ class AudioController extends ChangeNotifier {
     await prefs.remove(_kMode);
   }
 
-  // ─── Message handling ─────────────────────────────────────────────────────────
+  // Message handling
 
   void _applyMessage(ServiceMessage msg) {
     switch (msg) {
@@ -297,7 +297,7 @@ class AudioController extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ─── Commands ─────────────────────────────────────────────────────────────────
+  // Commands
 
   void _send(Map<String, dynamic> cmd) {
     final json = encodeCmd(cmd);
@@ -357,7 +357,7 @@ class AudioController extends ChangeNotifier {
     }
   }
 
-  // ─── Helpers ──────────────────────────────────────────────────────────────────
+  // Helpers
 
   void _setStatus(ConnectionStatus s) {
     _status = s;

@@ -14,7 +14,7 @@ const List<double> eqFreqsHz = [
 String eqFreqLabel(double hz) =>
     hz >= 1000 ? '${(hz / 1000).toStringAsFixed(0)}k' : hz.toStringAsFixed(0);
 
-// ─── Source ───────────────────────────────────────────────────────────────────
+// Source
 
 enum AudioSource { airplay, bluetooth }
 
@@ -26,7 +26,7 @@ extension AudioSourceX on AudioSource {
       this == AudioSource.airplay ? AudioSource.bluetooth : AudioSource.airplay;
 }
 
-// ─── DSP state ────────────────────────────────────────────────────────────────
+// DSP state
 
 class DspState {
   final double volume;
@@ -85,7 +85,7 @@ class DspState {
       );
 }
 
-// ─── Stats ────────────────────────────────────────────────────────────────────
+// Stats
 
 class StatsSnapshot {
   final double rmsL, rmsR, peakL, peakR;
@@ -127,7 +127,7 @@ class StatsSnapshot {
   }
 }
 
-// ─── Track info ───────────────────────────────────────────────────────────────
+// Track info
 
 class TrackInfo {
   final String? title, artist, album;
@@ -177,7 +177,7 @@ class TrackInfo {
   }
 }
 
-// ─── Incoming message ─────────────────────────────────────────────────────────
+// Incoming message
 
 sealed class ServiceMessage {
   const ServiceMessage();
@@ -212,7 +212,7 @@ ServiceMessage? parseMessage(String raw) {
   }
 }
 
-// ─── Commands ─────────────────────────────────────────────────────────────────
+// Commands
 
 String encodeCmd(Map<String, dynamic> cmd) => jsonEncode(cmd);
 

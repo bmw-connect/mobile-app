@@ -61,7 +61,7 @@ class _Header extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'BNW Connect',
+                'BMW Connect',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontSize: 22,
                       letterSpacing: -0.5,
@@ -69,7 +69,7 @@ class _Header extends StatelessWidget {
               ),
               const SizedBox(height: 1),
               Text(
-                'BMW E46 · HiFiBerry DAC',
+                'BMW E46',
                 style: Theme.of(context)
                     .textTheme
                     .bodySmall

@@ -225,7 +225,7 @@ class _BleSection extends StatelessWidget {
                       ),
                       SizedBox(width: 10),
                       Text(
-                        'Looking for device…',                        
+                        'Looking for device…',
                         style: TextStyle(
                           color: AppColors.textSecondary,
                           fontSize: 13,
@@ -387,7 +387,7 @@ class _WsSectionState extends State<_WsSection> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Enter the Raspberry Pi IP. The app connects to port 9000.',
+              'Enter the IP. The app connects to port 9000.',
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 12),
@@ -402,7 +402,7 @@ class _WsSectionState extends State<_WsSection> {
                 fontFeatures: [FontFeature.tabularFigures()],
               ),
               decoration: const InputDecoration(
-                hintText: '192.168.1.100',
+                hintText: '192.168.50.1',
                 prefixIcon: Icon(
                   Icons.dns_outlined,
                   size: 18,
@@ -465,8 +465,7 @@ class _AboutCard extends StatelessWidget {
             const SizedBox(height: 4),
             const Text(
               'Remote controller for the BMW Connect Rust daemon.\n'
-              'Connects via BLE GATT or WebSocket on port 9000.\n'
-              'BLE service UUID: cafecafe-…-0001',
+              'Connects via BLE GATT or WebSocket on port 9000.',
               style: TextStyle(
                 color: AppColors.textSecondary,
                 fontSize: 12,
