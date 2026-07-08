@@ -16,6 +16,7 @@ dependencies:
   web_socket_channel: ^3.0.1
   flutter_blue_plus: ^1.35.3
   shared_preferences: ^2.3.5
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
