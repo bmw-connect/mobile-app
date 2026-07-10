@@ -9,42 +9,35 @@ class VuMetersWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     final ctrl = context.watch<AudioController>();
     final stats = ctrl.stats;
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                const Text(
-                  'VU METERS',
-                  style: TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.2,
-                  ),
+                Text(
+                  'LEVELS',
+                  style: Theme.of(context).textTheme.labelSmall,
                 ),
                 const Spacer(),
                 if (stats?.clipping == true)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                     decoration: BoxDecoration(
-                      color: AppColors.clip.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(
-                        color: AppColors.clip.withValues(alpha: 0.5),
-                        width: 0.5,
-                      ),
+                      color: c.error.withValues(alpha: 0.16),
+                      borderRadius: BorderRadius.circular(6),
                     ),
-                    child: const Text(
+                    child: Text(
                       'CLIP',
                       style: TextStyle(
-                        color: AppColors.clip,
+                        color: c.error,
                         fontSize: 9,
                         fontWeight: FontWeight.w800,
                         letterSpacing: 1,
@@ -83,15 +76,16 @@ class _VuChannel extends StatelessWidget {
     required this.peak,
   });
 
-  Color _color(double linear) {
+  Color _color(AppColors c, double linear) {
     final db = StatsSnapshot.toDbfs(linear);
-    if (db >= -3) return AppColors.vuRed;
-    if (db >= -12) return AppColors.vuYellow;
-    return AppColors.vuGreen;
+    if (db >= -3) return c.vuRed;
+    if (db >= -12) return c.vuYellow;
+    return c.vuGreen;
   }
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     final rmsPct = StatsSnapshot.toGaugePct(rms);
     final peakPct = StatsSnapshot.toGaugePct(peak);
     final db = StatsSnapshot.toDbfs(rms);
@@ -102,8 +96,8 @@ class _VuChannel extends StatelessWidget {
           width: 14,
           child: Text(
             label,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
+            style: TextStyle(
+              color: c.textSecondary,
               fontSize: 11,
               fontWeight: FontWeight.w700,
             ),
@@ -112,20 +106,28 @@ class _VuChannel extends StatelessWidget {
         const SizedBox(width: 8),
         Expanded(
           child: SizedBox(
-            height: 20,
+            height: 18,
             child: CustomPaint(
-              painter: _VuPainter(rms: rmsPct, peak: peakPct),
+              painter: _VuPainter(
+                rms: rmsPct,
+                peak: peakPct,
+                trackColor: c.cardAlt,
+                green: c.vuGreen,
+                yellow: c.vuYellow,
+                red: c.vuRed,
+                peakColor: c.textPrimary,
+              ),
             ),
           ),
         ),
         const SizedBox(width: 10),
         SizedBox(
-          width: 52,
+          width: 56,
           child: Text(
             '${db.toStringAsFixed(1)} dB',
             textAlign: TextAlign.right,
             style: TextStyle(
-              color: _color(rms),
+              color: _color(c, rms),
               fontSize: 11,
               fontWeight: FontWeight.w600,
               fontFeatures: const [FontFeature.tabularFigures()],
@@ -140,31 +142,44 @@ class _VuChannel extends StatelessWidget {
 class _VuPainter extends CustomPainter {
   final double rms;
   final double peak;
+  final Color trackColor;
+  final Color green;
+  final Color yellow;
+  final Color red;
+  final Color peakColor;
 
-  const _VuPainter({required this.rms, required this.peak});
+  const _VuPainter({
+    required this.rms,
+    required this.peak,
+    required this.trackColor,
+    required this.green,
+    required this.yellow,
+    required this.red,
+    required this.peakColor,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final bgPaint = Paint()..color = AppColors.border.withValues(alpha: 0.5);
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromLTWH(0, 0, size.width, size.height),
-        const Radius.circular(4),
+        Radius.circular(size.height / 2),
       ),
-      bgPaint,
+      Paint()..color = trackColor,
     );
 
     if (rms > 0) {
       final rmsPaint = Paint()
-        ..shader = const LinearGradient(
-          colors: [AppColors.vuGreen, AppColors.vuGreen, AppColors.vuYellow, AppColors.vuRed],
-          stops: [0.0, 0.6, 0.8, 1.0],
+        ..shader = LinearGradient(
+          colors: [green, green, yellow, red],
+          stops: const [0.0, 0.6, 0.8, 1.0],
         ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
 
       canvas.drawRRect(
         RRect.fromRectAndRadius(
-          Rect.fromLTWH(0, 0, (size.width * rms).clamp(0, size.width), size.height),
-          const Radius.circular(4),
+          Rect.fromLTWH(
+              0, 0, (size.width * rms).clamp(0, size.width), size.height),
+          Radius.circular(size.height / 2),
         ),
         rmsPaint,
       );
@@ -173,17 +188,22 @@ class _VuPainter extends CustomPainter {
     if (peak > 0) {
       final px = (size.width * peak).clamp(1.0, size.width - 1.0);
       canvas.drawLine(
-        Offset(px, 2),
-        Offset(px, size.height - 2),
+        Offset(px, 3),
+        Offset(px, size.height - 3),
         Paint()
-          ..color = Colors.white.withValues(alpha: 0.9)
-          ..strokeWidth = 1.5,
+          ..color = peakColor.withValues(alpha: 0.8)
+          ..strokeWidth = 1.5
+          ..strokeCap = StrokeCap.round,
       );
     }
   }
 
   @override
-  bool shouldRepaint(_VuPainter old) => old.rms != rms || old.peak != peak;
+  bool shouldRepaint(_VuPainter old) =>
+      old.rms != rms ||
+      old.peak != peak ||
+      old.trackColor != trackColor ||
+      old.peakColor != peakColor;
 }
 
 class StatsBar extends StatelessWidget {
@@ -191,6 +211,7 @@ class StatsBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     final ctrl = context.watch<AudioController>();
     final stats = ctrl.stats;
     final sr = ctrl.dsp.source.sampleRate;
@@ -215,9 +236,8 @@ class StatsBar extends StatelessWidget {
           _Stat(
             label: 'CLIP',
             value: stats?.clipping == true ? 'YES' : 'no',
-            valueColor: stats?.clipping == true
-                ? AppColors.clip
-                : AppColors.textSecondary,
+            valueColor:
+                stats?.clipping == true ? c.error : c.textSecondary,
           ),
         ],
       ),
@@ -234,6 +254,7 @@ class _Stat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     return Expanded(
       child: Column(
         children: [
@@ -242,8 +263,8 @@ class _Stat extends StatelessWidget {
           Text(
             value,
             style: TextStyle(
-              color: valueColor ?? AppColors.textPrimary,
-              fontSize: 11,
+              color: valueColor ?? c.textPrimary,
+              fontSize: 12,
               fontWeight: FontWeight.w600,
               fontFeatures: const [FontFeature.tabularFigures()],
             ),
@@ -262,7 +283,7 @@ class _Sep extends StatelessWidget {
     return Container(
       width: 0.5,
       height: 28,
-      color: AppColors.border,
+      color: AppColors.of(context).separator,
       margin: const EdgeInsets.symmetric(horizontal: 4),
     );
   }

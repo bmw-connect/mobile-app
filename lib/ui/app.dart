@@ -10,7 +10,9 @@ class CarplayApp extends StatelessWidget {
     return MaterialApp(
       title: 'BMW Connect',
       debugShowCheckedModeBanner: false,
-      theme: buildAppTheme(),
+      theme: buildAppTheme(Brightness.light),
+      darkTheme: buildAppTheme(Brightness.dark),
+      themeMode: ThemeMode.system,
       home: const RootScreen(),
     );
   }

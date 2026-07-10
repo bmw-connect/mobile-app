@@ -13,22 +13,23 @@ class SettingsScreen extends StatelessWidget {
     final ctrl = context.watch<AudioController>();
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(),
           slivers: [
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+                padding: const EdgeInsets.fromLTRB(20, 18, 16, 6),
                 child: Text(
                   'Settings',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 22),
+                  style: Theme.of(context).textTheme.displaySmall,
                 ),
               ),
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                padding: const EdgeInsets.fromLTRB(20, 16, 16, 0),
                 child: _Label('CONNECTION'),
               ),
             ),
@@ -40,7 +41,7 @@ class SettingsScreen extends StatelessWidget {
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                padding: const EdgeInsets.fromLTRB(20, 20, 16, 0),
                 child: _Label('BLUETOOTH (BLE)'),
               ),
             ),
@@ -52,7 +53,7 @@ class SettingsScreen extends StatelessWidget {
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                padding: const EdgeInsets.fromLTRB(20, 20, 16, 0),
                 child: _Label('WEBSOCKET (Wi-Fi)'),
               ),
             ),
@@ -64,7 +65,7 @@ class SettingsScreen extends StatelessWidget {
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+                padding: const EdgeInsets.fromLTRB(20, 24, 16, 0),
                 child: _Label('ABOUT'),
               ),
             ),
@@ -87,15 +88,7 @@ class _Label extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: const TextStyle(
-        color: AppColors.textSecondary,
-        fontSize: 11,
-        fontWeight: FontWeight.w700,
-        letterSpacing: 1.2,
-      ),
-    );
+    return Text(text, style: Theme.of(context).textTheme.labelSmall);
   }
 }
 
@@ -105,7 +98,8 @@ class _ConnectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (statusColor, statusLabel) = _statusInfo(ctrl.status);
+    final c = AppColors.of(context);
+    final (statusColor, statusLabel) = _statusInfo(c, ctrl.status);
 
     return Card(
       child: Column(
@@ -115,9 +109,9 @@ class _ConnectionCard extends StatelessWidget {
             leading: Icon(_modeIcon(ctrl.mode), color: statusColor, size: 20),
             title: Text(
               ctrl.connectedLabel ?? _modeLabel(ctrl.mode),
-              style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 14,
+              style: TextStyle(
+                color: c.textPrimary,
+                fontSize: 15,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -131,7 +125,7 @@ class _ConnectionCard extends StatelessWidget {
                       HapticFeedback.mediumImpact();
                       ctrl.disconnect();
                     },
-                    style: TextButton.styleFrom(foregroundColor: AppColors.error),
+                    style: TextButton.styleFrom(foregroundColor: c.error),
                     child: const Text('Disconnect'),
                   )
                 : null,
@@ -141,18 +135,15 @@ class _ConnectionCard extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: AppColors.error.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: AppColors.error.withValues(alpha: 0.2),
-                    width: 0.5,
-                  ),
+                  color: c.error.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
                   ctrl.errorMsg!,
-                  style: const TextStyle(color: AppColors.error, fontSize: 12),
+                  style: TextStyle(color: c.error, fontSize: 12),
                 ),
               ),
             ),
@@ -161,12 +152,12 @@ class _ConnectionCard extends StatelessWidget {
     );
   }
 
-  (Color, String) _statusInfo(ConnectionStatus s) => switch (s) {
-        ConnectionStatus.connected => (AppColors.success, 'Connected'),
-        ConnectionStatus.connecting => (AppColors.warning, 'Connecting…'),
-        ConnectionStatus.scanning => (AppColors.bluetooth, 'Scanning…'),
-        ConnectionStatus.error => (AppColors.error, 'Error'),
-        ConnectionStatus.disconnected => (AppColors.textMuted, 'Not connected'),
+  (Color, String) _statusInfo(AppColors c, ConnectionStatus s) => switch (s) {
+        ConnectionStatus.connected => (c.success, 'Connected'),
+        ConnectionStatus.connecting => (c.warning, 'Connecting…'),
+        ConnectionStatus.scanning => (c.bluetooth, 'Scanning…'),
+        ConnectionStatus.error => (c.error, 'Error'),
+        ConnectionStatus.disconnected => (c.textSecondary, 'Not connected'),
       };
 
   IconData _modeIcon(ConnectionMode m) => switch (m) {
@@ -188,6 +179,8 @@ class _BleSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -211,8 +204,8 @@ class _BleSection extends StatelessWidget {
               const Divider(),
               const SizedBox(height: 8),
               if (ctrl.isScanning && ctrl.scanResults.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Row(
                     children: [
                       SizedBox(
@@ -220,14 +213,14 @@ class _BleSection extends StatelessWidget {
                         height: 14,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: AppColors.bluetooth,
+                          color: c.bluetooth,
                         ),
                       ),
-                      SizedBox(width: 10),
+                      const SizedBox(width: 10),
                       Text(
                         'Looking for device…',
                         style: TextStyle(
-                          color: AppColors.textSecondary,
+                          color: c.textSecondary,
                           fontSize: 13,
                         ),
                       ),
@@ -255,21 +248,22 @@ class _ScanButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+
     if (ctrl.isScanning) {
       return OutlinedButton.icon(
         onPressed: ctrl.stopBleScan,
-        icon: const SizedBox(
+        icon: SizedBox(
           width: 12,
           height: 12,
           child: CircularProgressIndicator(
             strokeWidth: 2,
-            color: AppColors.bluetooth,
+            color: c.accent,
           ),
         ),
         label: const Text('Stop'),
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.bluetooth,
-          side: const BorderSide(color: AppColors.bluetooth, width: 0.5),
+          foregroundColor: c.accent,
           textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
         ),
       );
@@ -282,8 +276,7 @@ class _ScanButton extends StatelessWidget {
       icon: const Icon(Icons.bluetooth_searching, size: 16),
       label: const Text('Scan'),
       style: FilledButton.styleFrom(
-        backgroundColor: AppColors.bluetooth,
-        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
       ),
     );
@@ -298,6 +291,7 @@ class _BleDevice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     final name = result.device.platformName.isNotEmpty
         ? result.device.platformName
         : result.advertisementData.advName.isNotEmpty
@@ -309,7 +303,7 @@ class _BleDevice extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          Icon(_rssiIcon(rssi), size: 16, color: AppColors.bluetooth),
+          Icon(_rssiIcon(rssi), size: 16, color: c.bluetooth),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -317,16 +311,16 @@ class _BleDevice extends StatelessWidget {
               children: [
                 Text(
                   name,
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 13,
+                  style: TextStyle(
+                    color: c.textPrimary,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
                   '$rssi dBm',
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
+                  style: TextStyle(
+                    color: c.textSecondary,
                     fontSize: 11,
                   ),
                 ),
@@ -336,10 +330,10 @@ class _BleDevice extends StatelessWidget {
           FilledButton(
             onPressed: onConnect,
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              minimumSize: const Size(72, 32),
-              textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+              minimumSize: const Size(76, 34),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              textStyle:
+                  const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
             ),
             child: const Text('Connect'),
           ),
@@ -380,6 +374,8 @@ class _WsSectionState extends State<_WsSection> {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -396,21 +392,21 @@ class _WsSectionState extends State<_WsSection> {
               keyboardType: TextInputType.url,
               autocorrect: false,
               enableSuggestions: false,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
+              style: TextStyle(
+                color: c.textPrimary,
                 fontSize: 14,
-                fontFeatures: [FontFeature.tabularFigures()],
+                fontFeatures: const [FontFeature.tabularFigures()],
               ),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: '192.168.50.1',
                 prefixIcon: Icon(
                   Icons.dns_outlined,
                   size: 18,
-                  color: AppColors.textSecondary,
+                  color: c.textSecondary,
                 ),
                 prefixText: 'ws://',
                 prefixStyle: TextStyle(
-                  color: AppColors.textSecondary,
+                  color: c.textSecondary,
                   fontSize: 13,
                 ),
               ),
@@ -428,14 +424,6 @@ class _WsSectionState extends State<_WsSection> {
                 },
                 icon: const Icon(Icons.wifi, size: 16),
                 label: const Text('Connect via Wi-Fi'),
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  textStyle: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
               ),
             ),
           ],
@@ -448,26 +436,28 @@ class _WsSectionState extends State<_WsSection> {
 class _AboutCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'BMW Connect',
               style: TextStyle(
-                color: AppColors.textPrimary,
+                color: c.textPrimary,
                 fontSize: 15,
                 fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 4),
-            const Text(
+            Text(
               'Remote controller for the BMW Connect Rust daemon.\n'
               'Connects via BLE GATT or WebSocket on port 9000.',
               style: TextStyle(
-                color: AppColors.textSecondary,
+                color: c.textSecondary,
                 fontSize: 12,
                 height: 1.6,
               ),
@@ -475,16 +465,16 @@ class _AboutCard extends StatelessWidget {
             const SizedBox(height: 12),
             const Divider(),
             const SizedBox(height: 8),
-            const Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   'Version',
-                  style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                  style: TextStyle(color: c.textSecondary, fontSize: 12),
                 ),
                 Text(
                   '1.0.0',
-                  style: TextStyle(color: AppColors.textPrimary, fontSize: 12),
+                  style: TextStyle(color: c.textPrimary, fontSize: 12),
                 ),
               ],
             ),

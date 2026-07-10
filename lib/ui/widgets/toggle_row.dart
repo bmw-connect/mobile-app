@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../core/audio_controller.dart';
 import '../theme.dart';
@@ -8,6 +9,7 @@ class DspToggleRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     final ctrl = context.watch<AudioController>();
     final dsp = ctrl.dsp;
     final limiterActive = ctrl.stats?.limiterActive ?? false;
@@ -22,24 +24,24 @@ class DspToggleRow extends StatelessWidget {
             onTap: () => ctrl.setLoudness(!dsp.loudness),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 10),
         Expanded(
           child: _Toggle(
             label: 'Limiter',
             icon: Icons.compress,
             active: dsp.limiter,
-            accent: limiterActive ? AppColors.warning : null,
+            accent: limiterActive ? c.warning : null,
             badge: limiterActive ? 'ACT' : null,
             onTap: () => ctrl.setLimiter(!dsp.limiter),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 10),
         Expanded(
           child: _Toggle(
             label: 'Mute',
             icon: Icons.volume_off,
             active: dsp.muted,
-            accent: dsp.muted ? AppColors.error : null,
+            accent: dsp.muted ? c.error : null,
             onTap: () => ctrl.setMute(!dsp.muted),
           ),
         ),
@@ -48,7 +50,7 @@ class DspToggleRow extends StatelessWidget {
   }
 }
 
-class _Toggle extends StatelessWidget {
+class _Toggle extends StatefulWidget {
   final String label;
   final IconData icon;
   final bool active;
@@ -66,55 +68,70 @@ class _Toggle extends StatelessWidget {
   });
 
   @override
+  State<_Toggle> createState() => _ToggleState();
+}
+
+class _ToggleState extends State<_Toggle> {
+  bool _pressed = false;
+
+  @override
   Widget build(BuildContext context) {
-    final color = accent ?? (active ? AppColors.primary : AppColors.textSecondary);
+    final c = AppColors.of(context);
+    final tint = widget.accent ?? c.accent;
+    final color = widget.active ? tint : c.textSecondary;
 
     return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-        decoration: BoxDecoration(
-          color: active ? color.withValues(alpha: 0.1) : AppColors.card,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(
-            color: active ? color.withValues(alpha: 0.35) : AppColors.border,
-            width: 0.5,
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapCancel: () => setState(() => _pressed = false),
+      onTapUp: (_) => setState(() => _pressed = false),
+      onTap: () {
+        HapticFeedback.selectionClick();
+        widget.onTap();
+      },
+      child: AnimatedScale(
+        scale: _pressed ? 0.95 : 1.0,
+        duration: const Duration(milliseconds: 120),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+          decoration: BoxDecoration(
+            color: widget.active ? tint.withValues(alpha: 0.14) : c.card,
+            borderRadius: BorderRadius.circular(16),
           ),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, size: 18, color: color),
-            const SizedBox(height: 5),
-            Text(
-              label,
-              style: TextStyle(
-                color: color,
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.3,
-              ),
-            ),
-            if (badge != null) ...[
-              const SizedBox(height: 3),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                decoration: BoxDecoration(
-                  color: (accent ?? AppColors.warning).withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(4),
+          child: Column(
+            children: [
+              Icon(widget.icon, size: 20, color: color),
+              const SizedBox(height: 6),
+              Text(
+                widget.label,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
                 ),
-                child: Text(
-                  badge!,
-                  style: TextStyle(
-                    color: accent ?? AppColors.warning,
-                    fontSize: 8,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.5,
+              ),
+              if (widget.badge != null) ...[
+                const SizedBox(height: 4),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                  decoration: BoxDecoration(
+                    color: tint.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    widget.badge!,
+                    style: TextStyle(
+                      color: tint,
+                      fontSize: 8,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.5,
+                    ),
                   ),
                 ),
-              ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

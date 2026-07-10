@@ -33,11 +33,12 @@ class _NowPlayingCardState extends State<NowPlayingCard> {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     final ctrl = context.watch<AudioController>();
     final track = ctrl.track;
     final source = ctrl.dsp.source;
     final sourceColor =
-        source == AudioSource.airplay ? AppColors.airplay : AppColors.bluetooth;
+        source == AudioSource.airplay ? c.airplay : c.bluetooth;
 
     return Card(
       child: Padding(
@@ -73,7 +74,7 @@ class _NowPlayingCardState extends State<NowPlayingCard> {
               Text(
                 '—',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: AppColors.textMuted,
+                      color: c.textTertiary,
                       fontWeight: FontWeight.w400,
                     ),
               ),
@@ -114,6 +115,7 @@ class _ProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     final pos = track.currentPositionMs ?? 0;
     final dur = track.durationMs ?? 1;
     final ratio = (pos / dur).clamp(0.0, 1.0);
@@ -124,10 +126,9 @@ class _ProgressBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(2),
           child: LinearProgressIndicator(
             value: ratio,
-            backgroundColor: AppColors.border,
-            valueColor:
-                const AlwaysStoppedAnimation<Color>(AppColors.textSecondary),
-            minHeight: 2,
+            backgroundColor: c.cardAlt,
+            valueColor: AlwaysStoppedAnimation<Color>(c.textSecondary),
+            minHeight: 3,
           ),
         ),
         const SizedBox(height: 6),
@@ -182,12 +183,13 @@ class _SignalDotState extends State<_SignalDot>
 
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     if (!widget.active) {
       return Container(
         width: 6,
         height: 6,
-        decoration: const BoxDecoration(
-          color: AppColors.textMuted,
+        decoration: BoxDecoration(
+          color: c.textTertiary,
           shape: BoxShape.circle,
         ),
       );
@@ -197,8 +199,8 @@ class _SignalDotState extends State<_SignalDot>
       child: Container(
         width: 6,
         height: 6,
-        decoration: const BoxDecoration(
-          color: AppColors.success,
+        decoration: BoxDecoration(
+          color: c.success,
           shape: BoxShape.circle,
         ),
       ),

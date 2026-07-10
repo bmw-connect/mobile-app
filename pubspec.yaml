@@ -17,6 +17,7 @@ dependencies:
   flutter_blue_plus: ^1.35.3
   shared_preferences: ^2.3.5
   flutter_launcher_icons: ^0.14.4
+  native_liquid_glass: ^0.2.13
 
 dev_dependencies:
   flutter_test:

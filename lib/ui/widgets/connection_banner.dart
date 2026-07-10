@@ -9,15 +9,14 @@ class ConnectionBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ctrl = context.watch<AudioController>();
-    final (color, icon, label) = _resolve(ctrl);
+    final (color, icon, label) = _resolve(AppColors.of(context), ctrl);
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withValues(alpha: 0.3), width: 0.5),
+        color: color.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -30,7 +29,7 @@ class ConnectionBanner extends StatelessWidget {
               color: color,
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              letterSpacing: 0.4,
+              letterSpacing: 0.2,
             ),
           ),
         ],
@@ -38,18 +37,17 @@ class ConnectionBanner extends StatelessWidget {
     );
   }
 
-  (Color, IconData, String) _resolve(AudioController ctrl) {
+  (Color, IconData, String) _resolve(AppColors c, AudioController ctrl) {
     return switch (ctrl.status) {
       ConnectionStatus.connected => ctrl.mode == ConnectionMode.ble
-          ? (AppColors.bluetooth, Icons.bluetooth_connected, 'BLE')
-          : (AppColors.success, Icons.wifi, ctrl.connectedLabel ?? 'WebSocket'),
-      ConnectionStatus.connecting =>
-        (AppColors.warning, Icons.sync, 'Connecting…'),
+          ? (c.bluetooth, Icons.bluetooth_connected, 'BLE')
+          : (c.success, Icons.wifi, ctrl.connectedLabel ?? 'WebSocket'),
+      ConnectionStatus.connecting => (c.warning, Icons.sync, 'Connecting…'),
       ConnectionStatus.scanning =>
-        (AppColors.bluetooth, Icons.bluetooth_searching, 'Scanning…'),
-      ConnectionStatus.error => (AppColors.error, Icons.error_outline, 'Error'),
+        (c.bluetooth, Icons.bluetooth_searching, 'Scanning…'),
+      ConnectionStatus.error => (c.error, Icons.error_outline, 'Error'),
       ConnectionStatus.disconnected =>
-        (AppColors.textMuted, Icons.link_off, 'Disconnected'),
+        (c.textSecondary, Icons.link_off, 'Disconnected'),
     };
   }
 }

@@ -1,162 +1,242 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+/// Apple-system-inspired palette. One instance per brightness; resolve the
+/// active one with [AppColors.of] so every widget follows the phone's theme.
 class AppColors {
-  AppColors._();
+  const AppColors._({
+    required this.bg,
+    required this.card,
+    required this.cardAlt,
+    required this.separator,
+    required this.textPrimary,
+    required this.textSecondary,
+    required this.textTertiary,
+    required this.accent,
+    required this.airplay,
+    required this.bluetooth,
+    required this.success,
+    required this.warning,
+    required this.error,
+    required this.vuGreen,
+    required this.vuYellow,
+    required this.vuRed,
+  });
 
-  static const bg = Color(0xFF070B14);
-  static const surface = Color(0xFF0E1523);
-  static const card = Color(0xFF111927);
-  static const border = Color(0xFF1B2A40);
+  /// Screen background (systemGroupedBackground).
+  final Color bg;
 
-  static const primary = Color(0xFF2563EB);
-  static const primaryLight = Color(0xFF3B82F6);
+  /// Grouped card / cell background.
+  final Color card;
 
-  static const airplay = Color(0xFF06B6D4);
-  static const bluetooth = Color(0xFF6366F1);
+  /// Inset fills inside cards: slider tracks, text fields, chips.
+  final Color cardAlt;
 
-  static const success = Color(0xFF10B981);
-  static const warning = Color(0xFFF59E0B);
-  static const error = Color(0xFFEF4444);
-  static const clip = Color(0xFFFF3B30);
+  final Color separator;
+  final Color textPrimary;
+  final Color textSecondary;
+  final Color textTertiary;
 
-  static const textPrimary = Color(0xFFF1F5F9);
-  static const textSecondary = Color(0xFF64748B);
-  static const textMuted = Color(0xFF334155);
+  /// Single app tint (system blue).
+  final Color accent;
 
-  static const vuGreen = Color(0xFF22C55E);
-  static const vuYellow = Color(0xFFF59E0B);
-  static const vuRed = Color(0xFFEF4444);
+  final Color airplay;
+  final Color bluetooth;
+  final Color success;
+  final Color warning;
+  final Color error;
+  final Color vuGreen;
+  final Color vuYellow;
+  final Color vuRed;
+
+  static const light = AppColors._(
+    bg: Color(0xFFF2F2F7),
+    card: Color(0xFFFFFFFF),
+    cardAlt: Color(0xFFEAEAEF),
+    separator: Color(0xFFE3E3E8),
+    textPrimary: Color(0xFF000000),
+    textSecondary: Color(0xFF85858B),
+    textTertiary: Color(0xFFB9B9BE),
+    accent: Color(0xFF007AFF),
+    airplay: Color(0xFF32ADE6),
+    bluetooth: Color(0xFF5856D6),
+    success: Color(0xFF34C759),
+    warning: Color(0xFFFF9500),
+    error: Color(0xFFFF3B30),
+    vuGreen: Color(0xFF34C759),
+    vuYellow: Color(0xFFFFCC00),
+    vuRed: Color(0xFFFF3B30),
+  );
+
+  static const dark = AppColors._(
+    bg: Color(0xFF000000),
+    card: Color(0xFF1C1C1E),
+    cardAlt: Color(0xFF2C2C2E),
+    separator: Color(0xFF38383A),
+    textPrimary: Color(0xFFFFFFFF),
+    textSecondary: Color(0xFF98989F),
+    textTertiary: Color(0xFF636367),
+    accent: Color(0xFF0A84FF),
+    airplay: Color(0xFF64D2FF),
+    bluetooth: Color(0xFF5E5CE6),
+    success: Color(0xFF30D158),
+    warning: Color(0xFFFF9F0A),
+    error: Color(0xFFFF453A),
+    vuGreen: Color(0xFF30D158),
+    vuYellow: Color(0xFFFFD60A),
+    vuRed: Color(0xFFFF453A),
+  );
+
+  static AppColors of(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark ? dark : light;
 }
 
-ThemeData buildAppTheme() {
+ThemeData buildAppTheme(Brightness brightness) {
+  final dark = brightness == Brightness.dark;
+  final c = dark ? AppColors.dark : AppColors.light;
+
   return ThemeData(
     useMaterial3: true,
-    brightness: Brightness.dark,
-    scaffoldBackgroundColor: AppColors.bg,
-    colorScheme: const ColorScheme.dark(
-      surface: AppColors.surface,
-      primary: AppColors.primary,
+    brightness: brightness,
+    scaffoldBackgroundColor: c.bg,
+    splashFactory: NoSplash.splashFactory,
+    colorScheme: ColorScheme(
+      brightness: brightness,
+      primary: c.accent,
       onPrimary: Colors.white,
-      secondary: AppColors.warning,
-      onSecondary: Colors.black,
-      error: AppColors.error,
-      onSurface: AppColors.textPrimary,
+      secondary: c.accent,
+      onSecondary: Colors.white,
+      error: c.error,
+      onError: Colors.white,
+      surface: c.card,
+      onSurface: c.textPrimary,
+      outline: c.separator,
     ),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: AppColors.bg,
-      foregroundColor: AppColors.textPrimary,
+    appBarTheme: AppBarTheme(
+      backgroundColor: c.bg,
+      foregroundColor: c.textPrimary,
       elevation: 0,
       centerTitle: false,
-      systemOverlayStyle: SystemUiOverlayStyle(
-        statusBarBrightness: Brightness.dark,
-        statusBarIconBrightness: Brightness.light,
-        systemNavigationBarColor: AppColors.surface,
-      ),
+      systemOverlayStyle: dark
+          ? SystemUiOverlayStyle.light.copyWith(systemNavigationBarColor: c.bg)
+          : SystemUiOverlayStyle.dark.copyWith(systemNavigationBarColor: c.bg),
     ),
     navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: AppColors.surface,
-      indicatorColor: AppColors.primary.withValues(alpha: 0.15),
+      backgroundColor: c.card,
+      indicatorColor: c.accent.withValues(alpha: 0.14),
       iconTheme: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
-          return const IconThemeData(color: AppColors.primary, size: 22);
+          return IconThemeData(color: c.accent, size: 22);
         }
-        return const IconThemeData(color: AppColors.textSecondary, size: 22);
+        return IconThemeData(color: c.textSecondary, size: 22);
       }),
       labelTextStyle: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
-          return const TextStyle(
-            color: AppColors.primary,
+          return TextStyle(
+            color: c.accent,
             fontSize: 11,
             fontWeight: FontWeight.w600,
           );
         }
-        return const TextStyle(color: AppColors.textSecondary, fontSize: 11);
+        return TextStyle(color: c.textSecondary, fontSize: 11);
       }),
       elevation: 0,
       surfaceTintColor: Colors.transparent,
     ),
-    sliderTheme: SliderThemeData(
-      activeTrackColor: AppColors.primary,
-      inactiveTrackColor: AppColors.border,
-      thumbColor: Colors.white,
-      overlayColor: AppColors.primary.withValues(alpha: 0.15),
-      trackHeight: 4,
-      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
-    ),
-    textTheme: const TextTheme(
+    textTheme: TextTheme(
+      // iOS large title.
       displaySmall: TextStyle(
-        color: AppColors.textPrimary,
-        fontSize: 28,
+        color: c.textPrimary,
+        fontSize: 32,
         fontWeight: FontWeight.w700,
-        letterSpacing: -1,
+        letterSpacing: -0.8,
       ),
       titleLarge: TextStyle(
-        color: AppColors.textPrimary,
+        color: c.textPrimary,
         fontSize: 18,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w600,
         letterSpacing: -0.3,
       ),
       titleMedium: TextStyle(
-        color: AppColors.textPrimary,
+        color: c.textPrimary,
         fontSize: 15,
         fontWeight: FontWeight.w600,
       ),
       titleSmall: TextStyle(
-        color: AppColors.textSecondary,
+        color: c.textSecondary,
         fontSize: 13,
         fontWeight: FontWeight.w500,
       ),
-      bodyMedium: TextStyle(color: AppColors.textPrimary, fontSize: 14),
-      bodySmall: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+      bodyMedium: TextStyle(color: c.textPrimary, fontSize: 15),
+      bodySmall: TextStyle(color: c.textSecondary, fontSize: 13),
       labelSmall: TextStyle(
-        color: AppColors.textSecondary,
-        fontSize: 10,
-        letterSpacing: 0.8,
-        fontWeight: FontWeight.w500,
+        color: c.textSecondary,
+        fontSize: 11,
+        letterSpacing: 0.6,
+        fontWeight: FontWeight.w600,
       ),
     ),
     cardTheme: CardThemeData(
-      color: AppColors.card,
+      color: c.card,
       elevation: 0,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: const BorderSide(color: AppColors.border, width: 0.5),
+        borderRadius: BorderRadius.circular(18),
       ),
       margin: EdgeInsets.zero,
     ),
-    dividerTheme: const DividerThemeData(
-      color: AppColors.border,
+    dividerTheme: DividerThemeData(
+      color: c.separator,
       thickness: 0.5,
       space: 0,
     ),
     switchTheme: SwitchThemeData(
-      thumbColor: WidgetStateProperty.resolveWith((s) =>
-          s.contains(WidgetState.selected)
-              ? Colors.white
-              : AppColors.textSecondary),
-      trackColor: WidgetStateProperty.resolveWith((s) =>
-          s.contains(WidgetState.selected) ? AppColors.primary : AppColors.border),
-      trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
+      thumbColor: const WidgetStatePropertyAll(Colors.white),
+      trackColor: WidgetStateProperty.resolveWith(
+          (s) => s.contains(WidgetState.selected) ? c.success : c.cardAlt),
+      trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: AppColors.card,
+      fillColor: c.cardAlt,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.border),
+        borderSide: BorderSide.none,
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.border),
+        borderSide: BorderSide.none,
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+        borderSide: BorderSide(color: c.accent, width: 1.5),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      labelStyle: const TextStyle(color: AppColors.textSecondary),
-      hintStyle: const TextStyle(color: AppColors.textMuted),
+      labelStyle: TextStyle(color: c.textSecondary),
+      hintStyle: TextStyle(color: c.textTertiary),
+    ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        backgroundColor: c.accent,
+        foregroundColor: Colors.white,
+        shape: const StadiumBorder(),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        shape: const StadiumBorder(),
+        side: BorderSide(color: c.separator),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+        textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: c.accent,
+        shape: const StadiumBorder(),
+        textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+      ),
     ),
   );
 }

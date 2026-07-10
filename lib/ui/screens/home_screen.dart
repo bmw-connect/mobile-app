@@ -13,33 +13,34 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(),
           slivers: [
             SliverToBoxAdapter(child: _Header()),
             const SliverPadding(
-              padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
+              padding: EdgeInsets.fromLTRB(16, 10, 16, 0),
               sliver: SliverToBoxAdapter(child: NowPlayingCard()),
             ),
             const SliverPadding(
-              padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
+              padding: EdgeInsets.fromLTRB(16, 14, 16, 0),
               sliver: SliverToBoxAdapter(child: SourceSwitcher()),
             ),
             const SliverPadding(
-              padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
+              padding: EdgeInsets.fromLTRB(16, 14, 16, 0),
               sliver: SliverToBoxAdapter(child: VolumeControl()),
             ),
             const SliverPadding(
-              padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
+              padding: EdgeInsets.fromLTRB(16, 14, 16, 0),
               sliver: SliverToBoxAdapter(child: DspToggleRow()),
             ),
             const SliverPadding(
-              padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
+              padding: EdgeInsets.fromLTRB(16, 14, 16, 0),
               sliver: SliverToBoxAdapter(child: VuMetersWidget()),
             ),
             const SliverPadding(
-              padding: EdgeInsets.fromLTRB(16, 10, 16, 20),
+              padding: EdgeInsets.fromLTRB(16, 12, 16, 24),
               sliver: SliverToBoxAdapter(child: StatsBar()),
             ),
           ],
@@ -52,8 +53,9 @@ class HomeScreen extends StatelessWidget {
 class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final c = AppColors.of(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+      padding: const EdgeInsets.fromLTRB(20, 18, 16, 6),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -62,18 +64,15 @@ class _Header extends StatelessWidget {
             children: [
               Text(
                 'BMW Connect',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontSize: 22,
-                      letterSpacing: -0.5,
-                    ),
+                style: Theme.of(context).textTheme.displaySmall,
               ),
-              const SizedBox(height: 1),
+              const SizedBox(height: 2),
               Text(
                 'BMW E46',
                 style: Theme.of(context)
                     .textTheme
                     .bodySmall
-                    ?.copyWith(color: AppColors.textMuted, fontSize: 11),
+                    ?.copyWith(color: c.textTertiary),
               ),
             ],
           ),
