@@ -261,6 +261,7 @@ class AudioController extends ChangeNotifier {
     _scanStatusSub?.cancel();
     _scanResultSub = null;
     _scanStatusSub = null;
+    _pendingBleCmds.clear();
 
     if (_bleDevice != null) {
       try {
@@ -299,15 +300,53 @@ class AudioController extends ChangeNotifier {
 
   // Commands
 
+  // Pending BLE commands, keyed per command (and per EQ band) so that slider
+  // bursts collapse to the latest value instead of flooding the GATT queue.
+  final Map<String, Map<String, dynamic>> _pendingBleCmds = {};
+  bool _bleSending = false;
+
   void _send(Map<String, dynamic> cmd) {
-    final json = encodeCmd(cmd);
+    if (_ws != null) {
+      try {
+        _ws!.sink.add(encodeCmd(cmd));
+      } catch (_) {}
+    } else if (_bleCmdChar != null) {
+      final key = cmd['cmd'] == 'set_eq_band'
+          ? 'set_eq_band:${cmd['band']}'
+          : cmd['cmd'] as String;
+      _pendingBleCmds[key] = cmd;
+      _drainBleQueue();
+    }
+  }
+
+  Future<void> _drainBleQueue() async {
+    if (_bleSending) return;
+    _bleSending = true;
     try {
-      if (_ws != null) {
-        _ws!.sink.add(json);
-      } else if (_bleCmdChar != null) {
-        _bleCmdChar!.write(utf8.encode(json), withoutResponse: true);
+      while (_pendingBleCmds.isNotEmpty) {
+        final char = _bleCmdChar;
+        if (char == null) {
+          _pendingBleCmds.clear();
+          break;
+        }
+        final key = _pendingBleCmds.keys.first;
+        final cmd = _pendingBleCmds.remove(key)!;
+        try {
+          // Prefer write-with-response: iOS write-without-response flow
+          // control can wedge against BlueZ peripherals (writes silently
+          // dropped until reconnect). Falls back for older daemons.
+          await char.write(
+            utf8.encode(encodeCmd(cmd)),
+            withoutResponse: !char.properties.write,
+            timeout: 3,
+          );
+        } catch (e) {
+          debugPrint('[ble] write failed: $e');
+        }
       }
-    } catch (_) {}
+    } finally {
+      _bleSending = false;
+    }
   }
 
   void setVolume(double value) {
